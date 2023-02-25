@@ -5,22 +5,22 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/usememos/memos/store/sqlite"
 	"io"
 	"net/http"
 
 	"github.com/pkg/errors"
 	"github.com/usememos/memos/plugin/idp"
-	"github.com/usememos/memos/store"
 	"golang.org/x/oauth2"
 )
 
 // IdentityProvider represents an OAuth2 Identity Provider.
 type IdentityProvider struct {
-	config *store.IdentityProviderOAuth2Config
+	config *sqlite.IdentityProviderOAuth2Config
 }
 
 // NewIdentityProvider initializes a new OAuth2 Identity Provider with the given configuration.
-func NewIdentityProvider(config *store.IdentityProviderOAuth2Config) (*IdentityProvider, error) {
+func NewIdentityProvider(config *sqlite.IdentityProviderOAuth2Config) (*IdentityProvider, error) {
 	for v, field := range map[string]string{
 		config.ClientID:                "clientId",
 		config.ClientSecret:            "clientSecret",

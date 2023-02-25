@@ -5,19 +5,19 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"time"
-
-	"github.com/pkg/errors"
-	"github.com/usememos/memos/api"
-	metric "github.com/usememos/memos/plugin/metrics"
-	"github.com/usememos/memos/server/profile"
 	"github.com/usememos/memos/store"
-	"github.com/usememos/memos/store/db"
+	"github.com/usememos/memos/store/sqlite"
+	"github.com/usememos/memos/store/sqlite/db"
+	"time"
 
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/pkg/errors"
+	"github.com/usememos/memos/api"
+	metric "github.com/usememos/memos/plugin/metrics"
+	"github.com/usememos/memos/server/profile"
 )
 
 type Server struct {
@@ -26,7 +26,7 @@ type Server struct {
 
 	ID        string
 	Profile   *profile.Profile
-	Store     *store.Store
+	Store     store.Store
 	Collector *MetricCollector
 }
 
@@ -46,7 +46,7 @@ func NewServer(ctx context.Context, profile *profile.Profile) (*Server, error) {
 		db:      db.DBInstance,
 		Profile: profile,
 	}
-	storeInstance := store.New(db.DBInstance, profile)
+	storeInstance := sqlite.New(db.DBInstance, profile)
 	s.Store = storeInstance
 
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{

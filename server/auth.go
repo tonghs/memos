@@ -3,18 +3,17 @@ package server
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/usememos/memos/store/sqlite"
 	"net/http"
 	"regexp"
 
+	"github.com/labstack/echo/v4"
 	"github.com/pkg/errors"
 	"github.com/usememos/memos/api"
 	"github.com/usememos/memos/common"
 	"github.com/usememos/memos/plugin/idp"
 	"github.com/usememos/memos/plugin/idp/oauth2"
 	metric "github.com/usememos/memos/plugin/metrics"
-	"github.com/usememos/memos/store"
-
-	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -61,7 +60,7 @@ func (s *Server) registerAuthRoutes(g *echo.Group) {
 			return echo.NewHTTPError(http.StatusBadRequest, "Malformatted signin request").SetInternal(err)
 		}
 
-		identityProviderMessage, err := s.Store.GetIdentityProvider(ctx, &store.FindIdentityProviderMessage{
+		identityProviderMessage, err := s.Store.GetIdentityProvider(ctx, &sqlite.FindIdentityProviderMessage{
 			ID: &signin.IdentityProviderID,
 		})
 		if err != nil {
@@ -69,7 +68,7 @@ func (s *Server) registerAuthRoutes(g *echo.Group) {
 		}
 
 		var userInfo *idp.IdentityProviderUserInfo
-		if identityProviderMessage.Type == store.IdentityProviderOAuth2 {
+		if identityProviderMessage.Type == sqlite.IdentityProviderOAuth2 {
 			oauth2IdentityProvider, err := oauth2.NewIdentityProvider(identityProviderMessage.Config.OAuth2Config)
 			if err != nil {
 				return echo.NewHTTPError(http.StatusInternalServerError, "Failed to create identity provider instance").SetInternal(err)
