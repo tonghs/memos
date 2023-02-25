@@ -5,10 +5,10 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"github.com/usememos/memos/store"
 	"strings"
 
 	"github.com/usememos/memos/common"
+	"github.com/usememos/memos/store"
 )
 
 func (s *Store) CreateIdentityProvider(ctx context.Context, create *store.IdentityProviderMessage) (*store.IdentityProviderMessage, error) {

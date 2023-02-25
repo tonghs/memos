@@ -5,12 +5,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/usememos/memos/store"
 	"io"
 	"net/http"
 
 	"github.com/pkg/errors"
 	"github.com/usememos/memos/plugin/idp"
+	"github.com/usememos/memos/store"
 	"golang.org/x/oauth2"
 )
 

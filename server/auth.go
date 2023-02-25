@@ -3,7 +3,6 @@ package server
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/usememos/memos/store"
 	"net/http"
 	"regexp"
 
@@ -14,6 +13,7 @@ import (
 	"github.com/usememos/memos/plugin/idp"
 	"github.com/usememos/memos/plugin/idp/oauth2"
 	metric "github.com/usememos/memos/plugin/metrics"
+	"github.com/usememos/memos/store"
 	"golang.org/x/crypto/bcrypt"
 )
 

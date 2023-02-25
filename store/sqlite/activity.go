@@ -3,6 +3,7 @@ package sqlite
 import (
 	"context"
 	"database/sql"
+
 	"github.com/usememos/memos/api"
 )
 

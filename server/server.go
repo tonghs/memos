@@ -5,9 +5,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"github.com/usememos/memos/store"
-	"github.com/usememos/memos/store/sqlite"
-	"github.com/usememos/memos/store/sqlite/db"
 	"time"
 
 	"github.com/gorilla/sessions"
@@ -18,6 +15,9 @@ import (
 	"github.com/usememos/memos/api"
 	metric "github.com/usememos/memos/plugin/metrics"
 	"github.com/usememos/memos/server/profile"
+	"github.com/usememos/memos/store"
+	"github.com/usememos/memos/store/sqlite"
+	"github.com/usememos/memos/store/sqlite/db"
 )
 
 type Server struct {

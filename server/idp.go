@@ -3,13 +3,13 @@ package server
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/usememos/memos/store"
 	"net/http"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
 	"github.com/usememos/memos/api"
 	"github.com/usememos/memos/common"
+	"github.com/usememos/memos/store"
 )
 
 func (s *Server) registerIdentityProviderRoutes(g *echo.Group) {
