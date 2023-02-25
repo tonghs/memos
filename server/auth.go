@@ -3,7 +3,7 @@ package server
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/usememos/memos/store/sqlite"
+	"github.com/usememos/memos/store"
 	"net/http"
 	"regexp"
 
@@ -60,7 +60,7 @@ func (s *Server) registerAuthRoutes(g *echo.Group) {
 			return echo.NewHTTPError(http.StatusBadRequest, "Malformatted signin request").SetInternal(err)
 		}
 
-		identityProviderMessage, err := s.Store.GetIdentityProvider(ctx, &sqlite.FindIdentityProviderMessage{
+		identityProviderMessage, err := s.Store.GetIdentityProvider(ctx, &store.FindIdentityProviderMessage{
 			ID: &signin.IdentityProviderID,
 		})
 		if err != nil {
@@ -68,7 +68,7 @@ func (s *Server) registerAuthRoutes(g *echo.Group) {
 		}
 
 		var userInfo *idp.IdentityProviderUserInfo
-		if identityProviderMessage.Type == sqlite.IdentityProviderOAuth2 {
+		if identityProviderMessage.Type == store.IdentityProviderOAuth2 {
 			oauth2IdentityProvider, err := oauth2.NewIdentityProvider(identityProviderMessage.Config.OAuth2Config)
 			if err != nil {
 				return echo.NewHTTPError(http.StatusInternalServerError, "Failed to create identity provider instance").SetInternal(err)

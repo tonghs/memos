@@ -46,6 +46,7 @@ func NewServer(ctx context.Context, profile *profile.Profile) (*Server, error) {
 		db:      db.DBInstance,
 		Profile: profile,
 	}
+	// TODO change to interface
 	storeInstance := sqlite.New(db.DBInstance, profile)
 	s.Store = storeInstance
 

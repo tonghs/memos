@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/usememos/memos/store/sqlite"
+	"github.com/usememos/memos/store"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -19,18 +19,18 @@ import (
 func TestNewIdentityProvider(t *testing.T) {
 	tests := []struct {
 		name        string
-		config      *sqlite.IdentityProviderOAuth2Config
+		config      *store.IdentityProviderOAuth2Config
 		containsErr string
 	}{
 		{
 			name: "no tokenUrl",
-			config: &sqlite.IdentityProviderOAuth2Config{
+			config: &store.IdentityProviderOAuth2Config{
 				ClientID:     "test-client-id",
 				ClientSecret: "test-client-secret",
 				AuthURL:      "",
 				TokenURL:     "",
 				UserInfoURL:  "https://example.com/api/user",
-				FieldMapping: &sqlite.FieldMapping{
+				FieldMapping: &store.FieldMapping{
 					Identifier: "login",
 				},
 			},
@@ -38,13 +38,13 @@ func TestNewIdentityProvider(t *testing.T) {
 		},
 		{
 			name: "no userInfoUrl",
-			config: &sqlite.IdentityProviderOAuth2Config{
+			config: &store.IdentityProviderOAuth2Config{
 				ClientID:     "test-client-id",
 				ClientSecret: "test-client-secret",
 				AuthURL:      "",
 				TokenURL:     "https://example.com/token",
 				UserInfoURL:  "",
-				FieldMapping: &sqlite.FieldMapping{
+				FieldMapping: &store.FieldMapping{
 					Identifier: "login",
 				},
 			},
@@ -52,13 +52,13 @@ func TestNewIdentityProvider(t *testing.T) {
 		},
 		{
 			name: "no field mapping identifier",
-			config: &sqlite.IdentityProviderOAuth2Config{
+			config: &store.IdentityProviderOAuth2Config{
 				ClientID:     "test-client-id",
 				ClientSecret: "test-client-secret",
 				AuthURL:      "",
 				TokenURL:     "https://example.com/token",
 				UserInfoURL:  "https://example.com/api/user",
-				FieldMapping: &sqlite.FieldMapping{
+				FieldMapping: &store.FieldMapping{
 					Identifier: "",
 				},
 			},
@@ -132,12 +132,12 @@ func TestIdentityProvider(t *testing.T) {
 	s := newMockServer(t, testCode, testAccessToken, userInfo)
 
 	oauth2, err := NewIdentityProvider(
-		&sqlite.IdentityProviderOAuth2Config{
+		&store.IdentityProviderOAuth2Config{
 			ClientID:     testClientID,
 			ClientSecret: "test-client-secret",
 			TokenURL:     fmt.Sprintf("%s/oauth2/token", s.URL),
 			UserInfoURL:  fmt.Sprintf("%s/oauth2/userinfo", s.URL),
-			FieldMapping: &sqlite.FieldMapping{
+			FieldMapping: &store.FieldMapping{
 				Identifier:  "sub",
 				DisplayName: "name",
 				Email:       "email",

@@ -5,7 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/usememos/memos/store/sqlite"
+	"github.com/usememos/memos/store"
 	"io"
 	"net/http"
 
@@ -16,11 +16,11 @@ import (
 
 // IdentityProvider represents an OAuth2 Identity Provider.
 type IdentityProvider struct {
-	config *sqlite.IdentityProviderOAuth2Config
+	config *store.IdentityProviderOAuth2Config
 }
 
 // NewIdentityProvider initializes a new OAuth2 Identity Provider with the given configuration.
-func NewIdentityProvider(config *sqlite.IdentityProviderOAuth2Config) (*IdentityProvider, error) {
+func NewIdentityProvider(config *store.IdentityProviderOAuth2Config) (*IdentityProvider, error) {
 	for v, field := range map[string]string{
 		config.ClientID:                "clientId",
 		config.ClientSecret:            "clientSecret",

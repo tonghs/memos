@@ -3,7 +3,7 @@ package server
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/usememos/memos/store/sqlite"
+	"github.com/usememos/memos/store"
 	"net/http"
 	"strconv"
 
@@ -35,9 +35,9 @@ func (s *Server) registerIdentityProviderRoutes(g *echo.Group) {
 			return echo.NewHTTPError(http.StatusBadRequest, "Malformatted post identity provider request").SetInternal(err)
 		}
 
-		identityProviderMessage, err := s.Store.CreateIdentityProvider(ctx, &sqlite.IdentityProviderMessage{
+		identityProviderMessage, err := s.Store.CreateIdentityProvider(ctx, &store.IdentityProviderMessage{
 			Name:             identityProviderCreate.Name,
-			Type:             sqlite.IdentityProviderType(identityProviderCreate.Type),
+			Type:             store.IdentityProviderType(identityProviderCreate.Type),
 			IdentifierFilter: identityProviderCreate.IdentifierFilter,
 			Config:           convertIdentityProviderConfigToStore(identityProviderCreate.Config),
 		})
@@ -76,9 +76,9 @@ func (s *Server) registerIdentityProviderRoutes(g *echo.Group) {
 			return echo.NewHTTPError(http.StatusBadRequest, "Malformatted patch identity provider request").SetInternal(err)
 		}
 
-		identityProviderMessage, err := s.Store.UpdateIdentityProvider(ctx, &sqlite.UpdateIdentityProviderMessage{
+		identityProviderMessage, err := s.Store.UpdateIdentityProvider(ctx, &store.UpdateIdentityProviderMessage{
 			ID:               identityProviderPatch.ID,
-			Type:             sqlite.IdentityProviderType(identityProviderPatch.Type),
+			Type:             store.IdentityProviderType(identityProviderPatch.Type),
 			Name:             identityProviderPatch.Name,
 			IdentifierFilter: identityProviderPatch.IdentifierFilter,
 			Config:           convertIdentityProviderConfigToStore(identityProviderPatch.Config),
@@ -91,7 +91,7 @@ func (s *Server) registerIdentityProviderRoutes(g *echo.Group) {
 
 	g.GET("/idp", func(c echo.Context) error {
 		ctx := c.Request().Context()
-		identityProviderMessageList, err := s.Store.ListIdentityProviders(ctx, &sqlite.FindIdentityProviderMessage{})
+		identityProviderMessageList, err := s.Store.ListIdentityProviders(ctx, &store.FindIdentityProviderMessage{})
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, "Failed to find identity provider list").SetInternal(err)
 		}
@@ -144,7 +144,7 @@ func (s *Server) registerIdentityProviderRoutes(g *echo.Group) {
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("ID is not a number: %s", c.Param("idpId"))).SetInternal(err)
 		}
-		identityProviderMessage, err := s.Store.GetIdentityProvider(ctx, &sqlite.FindIdentityProviderMessage{
+		identityProviderMessage, err := s.Store.GetIdentityProvider(ctx, &store.FindIdentityProviderMessage{
 			ID: &identityProviderID,
 		})
 		if err != nil {
@@ -175,7 +175,7 @@ func (s *Server) registerIdentityProviderRoutes(g *echo.Group) {
 			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("ID is not a number: %s", c.Param("idpId"))).SetInternal(err)
 		}
 
-		if err = s.Store.DeleteIdentityProvider(ctx, &sqlite.DeleteIdentityProviderMessage{ID: identityProviderID}); err != nil {
+		if err = s.Store.DeleteIdentityProvider(ctx, &store.DeleteIdentityProviderMessage{ID: identityProviderID}); err != nil {
 			if common.ErrorCode(err) == common.NotFound {
 				return echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("Identity provider ID not found: %d", identityProviderID))
 			}
@@ -185,7 +185,7 @@ func (s *Server) registerIdentityProviderRoutes(g *echo.Group) {
 	})
 }
 
-func convertIdentityProviderFromStore(identityProviderMessage *sqlite.IdentityProviderMessage) *api.IdentityProvider {
+func convertIdentityProviderFromStore(identityProviderMessage *store.IdentityProviderMessage) *api.IdentityProvider {
 	return &api.IdentityProvider{
 		ID:               identityProviderMessage.ID,
 		Name:             identityProviderMessage.Name,
@@ -195,7 +195,7 @@ func convertIdentityProviderFromStore(identityProviderMessage *sqlite.IdentityPr
 	}
 }
 
-func convertIdentityProviderConfigFromStore(config *sqlite.IdentityProviderConfig) *api.IdentityProviderConfig {
+func convertIdentityProviderConfigFromStore(config *store.IdentityProviderConfig) *api.IdentityProviderConfig {
 	return &api.IdentityProviderConfig{
 		OAuth2Config: &api.IdentityProviderOAuth2Config{
 			ClientID:     config.OAuth2Config.ClientID,
@@ -213,16 +213,16 @@ func convertIdentityProviderConfigFromStore(config *sqlite.IdentityProviderConfi
 	}
 }
 
-func convertIdentityProviderConfigToStore(config *api.IdentityProviderConfig) *sqlite.IdentityProviderConfig {
-	return &sqlite.IdentityProviderConfig{
-		OAuth2Config: &sqlite.IdentityProviderOAuth2Config{
+func convertIdentityProviderConfigToStore(config *api.IdentityProviderConfig) *store.IdentityProviderConfig {
+	return &store.IdentityProviderConfig{
+		OAuth2Config: &store.IdentityProviderOAuth2Config{
 			ClientID:     config.OAuth2Config.ClientID,
 			ClientSecret: config.OAuth2Config.ClientSecret,
 			AuthURL:      config.OAuth2Config.AuthURL,
 			TokenURL:     config.OAuth2Config.TokenURL,
 			UserInfoURL:  config.OAuth2Config.UserInfoURL,
 			Scopes:       config.OAuth2Config.Scopes,
-			FieldMapping: &sqlite.FieldMapping{
+			FieldMapping: &store.FieldMapping{
 				Identifier:  config.OAuth2Config.FieldMapping.Identifier,
 				DisplayName: config.OAuth2Config.FieldMapping.DisplayName,
 				Email:       config.OAuth2Config.FieldMapping.Email,
