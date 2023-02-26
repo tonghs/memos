@@ -9,8 +9,8 @@ import (
 	"github.com/usememos/memos/store/sqlite"
 )
 
-// NewStore creates a new instance of Store.
-func NewStore(db *sql.DB, profile *profile.Profile) store.Store {
+// newStore creates a new instance of Store.
+func newStore(db *sql.DB, profile *profile.Profile) store.Store {
 	switch profile.DBDriver {
 	case store.SQLiteDriver:
 		return sqlite.New(db, profile)

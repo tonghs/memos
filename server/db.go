@@ -9,7 +9,7 @@ import (
 	sqliteDB "github.com/usememos/memos/store/sqlite/db"
 )
 
-func NewDB(profile *profile.Profile) store.DB {
+func newDB(profile *profile.Profile) store.DB {
 	switch profile.DBDriver {
 	case store.SQLiteDriver:
 		return sqliteDB.NewDB(profile)

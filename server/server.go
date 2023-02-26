@@ -34,7 +34,7 @@ func NewServer(ctx context.Context, profile *profile.Profile) (*Server, error) {
 	e.HideBanner = true
 	e.HidePort = true
 
-	db := NewDB(profile)
+	db := newDB(profile)
 	if err := db.Open(ctx); err != nil {
 		return nil, errors.Wrap(err, "cannot open db")
 	}
@@ -44,7 +44,7 @@ func NewServer(ctx context.Context, profile *profile.Profile) (*Server, error) {
 		db:      db.Instance(),
 		Profile: profile,
 	}
-	storeInstance := NewStore(db.Instance(), profile)
+	storeInstance := newStore(db.Instance(), profile)
 	s.Store = storeInstance
 
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
