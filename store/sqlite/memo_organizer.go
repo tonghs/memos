@@ -10,7 +10,7 @@ import (
 	"github.com/usememos/memos/common"
 )
 
-// memoOrganizerRaw is the store model for an MemoOrganizer.
+// memoOrganizerRaw is the sqlite model for an MemoOrganizer.
 // Fields have exactly the same meanings as MemoOrganizer.
 type memoOrganizerRaw struct {
 	ID int

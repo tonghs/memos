@@ -7,7 +7,7 @@ import (
 	"github.com/usememos/memos/api"
 )
 
-// activityRaw is the store model for an Activity.
+// activityRaw is the sqlite model for an Activity.
 // Fields have exactly the same meanings as Activity.
 type activityRaw struct {
 	ID int

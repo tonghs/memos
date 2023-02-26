@@ -112,7 +112,7 @@ const SystemSection = () => {
       ...state,
       disablePublicMemos: value,
     });
-    // Update global store immediately as MemoEditor/Selector is dependent on this value.
+    // Update global sqlite immediately as MemoEditor/Selector is dependent on this value.
     dispatch(setGlobalState({ systemStatus: { ...systemStatus, disablePublicMemos: value } }));
     await api.upsertSystemSetting({
       name: "disablePublicMemos",

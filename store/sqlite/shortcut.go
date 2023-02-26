@@ -10,7 +10,7 @@ import (
 	"github.com/usememos/memos/common"
 )
 
-// shortcutRaw is the store model for an Shortcut.
+// shortcutRaw is the sqlite model for an Shortcut.
 // Fields have exactly the same meanings as Shortcut.
 type shortcutRaw struct {
 	ID int

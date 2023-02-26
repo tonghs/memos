@@ -11,7 +11,7 @@ import (
 	"github.com/usememos/memos/common"
 )
 
-// resourceRaw is the store model for an Resource.
+// resourceRaw is the sqlite model for an Resource.
 // Fields have exactly the same meanings as Resource.
 type resourceRaw struct {
 	ID int

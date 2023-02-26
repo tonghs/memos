@@ -10,7 +10,7 @@ import (
 	"github.com/usememos/memos/common"
 )
 
-// memoRaw is the store model for an Memo.
+// memoRaw is the sqlite model for an Memo.
 // Fields have exactly the same meanings as Memo.
 type memoRaw struct {
 	ID int

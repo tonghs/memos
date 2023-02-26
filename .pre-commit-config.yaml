@@ -4,5 +4,5 @@ repos:
     hooks:
       - id: golangci-lint
         args:
-          - --disable=staticcheck,varcheck,deadcode,unused
+          - --disable=varcheck,deadcode,unused
           - --enable=goimports,whitespace

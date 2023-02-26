@@ -10,7 +10,7 @@ import (
 	"github.com/usememos/memos/common"
 )
 
-// userRaw is the store model for an User.
+// userRaw is the sqlite model for an User.
 // Fields have exactly the same meanings as User.
 type userRaw struct {
 	ID int

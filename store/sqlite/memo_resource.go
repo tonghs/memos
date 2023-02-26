@@ -10,7 +10,7 @@ import (
 	"github.com/usememos/memos/common"
 )
 
-// memoResourceRaw is the store model for an MemoResource.
+// memoResourceRaw is the sqlite model for an MemoResource.
 // Fields have exactly the same meanings as MemoResource.
 type memoResourceRaw struct {
 	MemoID     int

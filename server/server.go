@@ -7,6 +7,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/usememos/memos/store"
+	"github.com/usememos/memos/store/sqlite"
+	"github.com/usememos/memos/store/sqlite/db"
+
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
@@ -15,9 +19,6 @@ import (
 	"github.com/usememos/memos/api"
 	metric "github.com/usememos/memos/plugin/metrics"
 	"github.com/usememos/memos/server/profile"
-	"github.com/usememos/memos/store"
-	"github.com/usememos/memos/store/sqlite"
-	"github.com/usememos/memos/store/sqlite/db"
 )
 
 type Server struct {
@@ -28,6 +29,19 @@ type Server struct {
 	Profile   *profile.Profile
 	Store     store.Store
 	Collector *MetricCollector
+}
+
+// NewStore creates a new instance of Store.
+func NewStore(db *sql.DB, profile *profile.Profile) store.Store {
+	switch profile.DataSource {
+	case "sqlite":
+		return sqlite.New(db, profile)
+	// case "mysql":
+	//	return rds.New(db, profile)
+	default:
+		fmt.Println("data source: >>>>>>>>>>>", profile.DataSource)
+		panic("unknown data source")
+	}
 }
 
 func NewServer(ctx context.Context, profile *profile.Profile) (*Server, error) {
@@ -46,8 +60,7 @@ func NewServer(ctx context.Context, profile *profile.Profile) (*Server, error) {
 		db:      db.DBInstance,
 		Profile: profile,
 	}
-	// TODO change to interface
-	storeInstance := sqlite.New(db.DBInstance, profile)
+	storeInstance := NewStore(db.DBInstance, profile)
 	s.Store = storeInstance
 
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
