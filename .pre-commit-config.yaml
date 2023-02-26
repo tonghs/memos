@@ -1,0 +1,8 @@
+repos:
+  - repo: https://github.com/golangci/golangci-lint
+    rev: v1.46.2
+    hooks:
+      - id: golangci-lint
+        args:
+          - --disable=staticcheck,varcheck,deadcode,unused
+          - --enable=goimports,whitespace
