@@ -25,6 +25,9 @@ require (
 	golang.org/x/mod v0.6.0
 	golang.org/x/net v0.6.0
 	golang.org/x/oauth2 v0.5.0
+	gorm.io/driver/mysql v1.4.7
+	gorm.io/driver/postgres v1.4.8
+	gorm.io/gorm v1.24.5
 )
 
 require (
@@ -82,10 +85,6 @@ require (
 	golang.org/x/time v0.1.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
-	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	gorm.io/driver/mysql v1.4.7 // indirect
-	gorm.io/driver/postgres v1.4.8 // indirect
-	gorm.io/gorm v1.24.5 // indirect
 )
