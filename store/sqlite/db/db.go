@@ -36,6 +36,10 @@ func NewDB(profile *profile.Profile) *DB {
 	return db
 }
 
+func (db *DB) Instance() *sql.DB {
+	return db.DBInstance
+}
+
 func (db *DB) Open(ctx context.Context) (err error) {
 	// Ensure a DSN is set before attempting to open the database.
 	if db.profile.DSN == "" {

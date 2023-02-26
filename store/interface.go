@@ -2,9 +2,21 @@ package store
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/usememos/memos/api"
 )
+
+const (
+	MySQLDriver    = "mysql"
+	PostgresDriver = "postgres"
+	SQLiteDriver   = "sqlite"
+)
+
+type DB interface {
+	Open(ctx context.Context) (err error)
+	Instance() *sql.DB
+}
 
 type Store interface {
 	CreateIdentityProvider(ctx context.Context, create *IdentityProviderMessage) (*IdentityProviderMessage, error)

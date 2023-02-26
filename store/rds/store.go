@@ -19,6 +19,14 @@ type Store struct {
 	idpCache         sync.Map // map[int]*identityProviderMessage
 }
 
+// New creates a new instance of Store.
+func New(db *sql.DB, profile *profile.Profile) *Store {
+	return &Store{
+		db:      db,
+		profile: profile,
+	}
+}
+
 // func (s *Store) CreateIdentityProvider(ctx context.Context, create *store.IdentityProviderMessage) (*store.IdentityProviderMessage, error) {
 //	// TODO implement me
 //	panic("implement me")
@@ -273,11 +281,3 @@ type Store struct {
 //	// TODO implement me
 //	panic("implement me")
 //}
-
-// New creates a new instance of Store.
-func New(db *sql.DB, profile *profile.Profile) *Store {
-	return &Store{
-		db:      db,
-		profile: profile,
-	}
-}
