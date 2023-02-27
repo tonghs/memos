@@ -1,4 +1,4 @@
-create table if not exists activity
+create table if not exists `activity`
 (
     id         int auto_increment
     primary key,
@@ -9,7 +9,7 @@ create table if not exists activity
     payload    text                                  not null
     );
 
-create table if not exists idp
+create table if not exists `idp`
 (
     id                int auto_increment
     primary key,
@@ -19,7 +19,7 @@ create table if not exists idp
     config            text                    not null
     );
 
-create table if not exists memo
+create table if not exists `memo`
 (
     id         int auto_increment
     primary key,
@@ -34,7 +34,7 @@ create table if not exists memo
 create index idx_creator_id
     on memo (creator_id);
 
-create table if not exists memo_organizer
+create table if not exists `memo_organizer`
 (
     id      int auto_increment
     primary key,
@@ -48,7 +48,7 @@ create table if not exists memo_organizer
 create index idx_user_id
     on memo_organizer (user_id);
 
-create table if not exists memo_resource
+create table if not exists `memo_resource`
 (
     memo_id     int                                 null,
     resource_id int                                 not null,
@@ -58,14 +58,14 @@ create table if not exists memo_resource
     unique (memo_id, resource_id)
     );
 
-create table if not exists migration_history
+create table if not exists `migration_history`
 (
     version    varchar(32)                         not null
     primary key,
     created_ts timestamp default CURRENT_TIMESTAMP not null
     );
 
-create table if not exists resource
+create table if not exists `resource`
 (
     id            int auto_increment
     primary key,
@@ -79,7 +79,7 @@ create table if not exists resource
     size          int          default 0                 not null
     );
 
-create table if not exists shortcut
+create table if not exists `shortcut`
 (
     id         int auto_increment
     primary key,
@@ -91,7 +91,7 @@ create table if not exists shortcut
     payload    text                                  not null
     );
 
-create table if not exists storage
+create table if not exists `storage`
 (
     id     int auto_increment
     primary key,
@@ -100,7 +100,7 @@ create table if not exists storage
     config text        not null
     );
 
-create table if not exists system_setting
+create table if not exists `system_setting`
 (
     name        varchar(32)             not null,
     value       varchar(128)            not null,
@@ -109,7 +109,7 @@ create table if not exists system_setting
     unique (name)
     );
 
-create table if not exists tag
+create table if not exists `tag`
 (
     name       varchar(32) not null,
     creator_id int         null,
@@ -120,7 +120,7 @@ create table if not exists tag
 create index idx_creator_id
     on tag (creator_id);
 
-create table if not exists user
+create table if not exists `user`
 (
     id            int auto_increment
     primary key,
@@ -140,7 +140,7 @@ create table if not exists user
     unique (username)
     );
 
-create table if not exists user_setting
+create table if not exists `user_setting`
 (
     user_id int          not null,
     `key`   varchar(128) not null,
