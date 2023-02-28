@@ -1,16 +1,17 @@
-package store
+package sqlite
 
 import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/usememos/memos/store"
 	"strings"
 
 	"github.com/usememos/memos/api"
 	"github.com/usememos/memos/common"
 )
 
-// memoRaw is the store model for an Memo.
+// memoRaw is the sqlite model for an Memo.
 // Fields have exactly the same meanings as Memo.
 type memoRaw struct {
 	ID int
@@ -60,7 +61,7 @@ func (s *Store) ComposeMemo(ctx context.Context, memo *api.Memo) (*api.Memo, err
 func (s *Store) CreateMemo(ctx context.Context, create *api.MemoCreate) (*api.Memo, error) {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 	defer tx.Rollback()
 
@@ -70,7 +71,7 @@ func (s *Store) CreateMemo(ctx context.Context, create *api.MemoCreate) (*api.Me
 	}
 
 	if err := tx.Commit(); err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 
 	s.memoCache.Store(memoRaw.ID, memoRaw)
@@ -85,7 +86,7 @@ func (s *Store) CreateMemo(ctx context.Context, create *api.MemoCreate) (*api.Me
 func (s *Store) PatchMemo(ctx context.Context, patch *api.MemoPatch) (*api.Memo, error) {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 	defer tx.Rollback()
 
@@ -95,7 +96,7 @@ func (s *Store) PatchMemo(ctx context.Context, patch *api.MemoPatch) (*api.Memo,
 	}
 
 	if err := tx.Commit(); err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 
 	s.memoCache.Store(memoRaw.ID, memoRaw)
@@ -110,7 +111,7 @@ func (s *Store) PatchMemo(ctx context.Context, patch *api.MemoPatch) (*api.Memo,
 func (s *Store) FindMemoList(ctx context.Context, find *api.MemoFind) ([]*api.Memo, error) {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 	defer tx.Rollback()
 
@@ -146,7 +147,7 @@ func (s *Store) FindMemo(ctx context.Context, find *api.MemoFind) (*api.Memo, er
 
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 	defer tx.Rollback()
 
@@ -172,19 +173,19 @@ func (s *Store) FindMemo(ctx context.Context, find *api.MemoFind) (*api.Memo, er
 func (s *Store) DeleteMemo(ctx context.Context, delete *api.MemoDelete) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
-		return FormatError(err)
+		return store.FormatError(err)
 	}
 	defer tx.Rollback()
 
 	if err := deleteMemo(ctx, tx, delete); err != nil {
-		return FormatError(err)
+		return store.FormatError(err)
 	}
 	if err := vacuum(ctx, tx); err != nil {
 		return err
 	}
 
 	if err := tx.Commit(); err != nil {
-		return FormatError(err)
+		return store.FormatError(err)
 	}
 
 	s.memoCache.Delete(delete.ID)
@@ -217,7 +218,7 @@ func createMemoRaw(ctx context.Context, tx *sql.Tx, create *api.MemoCreate) (*me
 		&memoRaw.Content,
 		&memoRaw.Visibility,
 	); err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 
 	return &memoRaw, nil
@@ -260,7 +261,7 @@ func patchMemoRaw(ctx context.Context, tx *sql.Tx, patch *api.MemoPatch) (*memoR
 		&memoRaw.Content,
 		&memoRaw.Visibility,
 	); err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 
 	return &memoRaw, nil
@@ -317,7 +318,7 @@ func findMemoRawList(ctx context.Context, tx *sql.Tx, find *api.MemoFind) ([]*me
 
 	rows, err := tx.QueryContext(ctx, query, args...)
 	if err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 	defer rows.Close()
 
@@ -335,7 +336,7 @@ func findMemoRawList(ctx context.Context, tx *sql.Tx, find *api.MemoFind) ([]*me
 			&memoRaw.Visibility,
 			&pinned,
 		); err != nil {
-			return nil, FormatError(err)
+			return nil, store.FormatError(err)
 		}
 
 		if pinned.Valid {
@@ -345,7 +346,7 @@ func findMemoRawList(ctx context.Context, tx *sql.Tx, find *api.MemoFind) ([]*me
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 
 	return memoRawList, nil
@@ -357,7 +358,7 @@ func deleteMemo(ctx context.Context, tx *sql.Tx, delete *api.MemoDelete) error {
 	stmt := `DELETE FROM memo WHERE ` + strings.Join(where, " AND ")
 	result, err := tx.ExecContext(ctx, stmt, args...)
 	if err != nil {
-		return FormatError(err)
+		return store.FormatError(err)
 	}
 
 	rows, _ := result.RowsAffected()
@@ -381,7 +382,7 @@ func vacuumMemo(ctx context.Context, tx *sql.Tx) error {
 		)`
 	_, err := tx.ExecContext(ctx, stmt)
 	if err != nil {
-		return FormatError(err)
+		return store.FormatError(err)
 	}
 
 	return nil

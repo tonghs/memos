@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"regexp"
 
+	"github.com/labstack/echo/v4"
 	"github.com/pkg/errors"
 	"github.com/usememos/memos/api"
 	"github.com/usememos/memos/common"
@@ -13,8 +14,6 @@ import (
 	"github.com/usememos/memos/plugin/idp/oauth2"
 	metric "github.com/usememos/memos/plugin/metrics"
 	"github.com/usememos/memos/store"
-
-	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
 )
 

@@ -1,16 +1,17 @@
-package store
+package sqlite
 
 import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/usememos/memos/store"
 	"strings"
 
 	"github.com/usememos/memos/api"
 	"github.com/usememos/memos/common"
 )
 
-// memoOrganizerRaw is the store model for an MemoOrganizer.
+// memoOrganizerRaw is the sqlite model for an MemoOrganizer.
 // Fields have exactly the same meanings as MemoOrganizer.
 type memoOrganizerRaw struct {
 	ID int
@@ -34,7 +35,7 @@ func (raw *memoOrganizerRaw) toMemoOrganizer() *api.MemoOrganizer {
 func (s *Store) FindMemoOrganizer(ctx context.Context, find *api.MemoOrganizerFind) (*api.MemoOrganizer, error) {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 	defer tx.Rollback()
 
@@ -51,7 +52,7 @@ func (s *Store) FindMemoOrganizer(ctx context.Context, find *api.MemoOrganizerFi
 func (s *Store) UpsertMemoOrganizer(ctx context.Context, upsert *api.MemoOrganizerUpsert) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
-		return FormatError(err)
+		return store.FormatError(err)
 	}
 	defer tx.Rollback()
 
@@ -60,7 +61,7 @@ func (s *Store) UpsertMemoOrganizer(ctx context.Context, upsert *api.MemoOrganiz
 	}
 
 	if err := tx.Commit(); err != nil {
-		return FormatError(err)
+		return store.FormatError(err)
 	}
 
 	return nil
@@ -69,7 +70,7 @@ func (s *Store) UpsertMemoOrganizer(ctx context.Context, upsert *api.MemoOrganiz
 func (s *Store) DeleteMemoOrganizer(ctx context.Context, delete *api.MemoOrganizerDelete) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
-		return FormatError(err)
+		return store.FormatError(err)
 	}
 	defer tx.Rollback()
 
@@ -78,7 +79,7 @@ func (s *Store) DeleteMemoOrganizer(ctx context.Context, delete *api.MemoOrganiz
 	}
 
 	if err := tx.Commit(); err != nil {
-		return FormatError(err)
+		return store.FormatError(err)
 	}
 
 	return nil
@@ -96,7 +97,7 @@ func findMemoOrganizer(ctx context.Context, tx *sql.Tx, find *api.MemoOrganizerF
 	`
 	row, err := tx.QueryContext(ctx, query, find.MemoID, find.UserID)
 	if err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 	defer row.Close()
 
@@ -111,7 +112,7 @@ func findMemoOrganizer(ctx context.Context, tx *sql.Tx, find *api.MemoOrganizerF
 		&memoOrganizerRaw.UserID,
 		&memoOrganizerRaw.Pinned,
 	); err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 
 	if err := row.Err(); err != nil {
@@ -141,7 +142,7 @@ func upsertMemoOrganizer(ctx context.Context, tx *sql.Tx, upsert *api.MemoOrgani
 		&memoOrganizer.UserID,
 		&memoOrganizer.Pinned,
 	); err != nil {
-		return FormatError(err)
+		return store.FormatError(err)
 	}
 
 	return nil
@@ -160,7 +161,7 @@ func deleteMemoOrganizer(ctx context.Context, tx *sql.Tx, delete *api.MemoOrgani
 	stmt := `DELETE FROM memo_organizer WHERE ` + strings.Join(where, " AND ")
 	result, err := tx.ExecContext(ctx, stmt, args...)
 	if err != nil {
-		return FormatError(err)
+		return store.FormatError(err)
 	}
 
 	rows, _ := result.RowsAffected()
@@ -190,7 +191,7 @@ func vacuumMemoOrganizer(ctx context.Context, tx *sql.Tx) error {
 		)`
 	_, err := tx.ExecContext(ctx, stmt)
 	if err != nil {
-		return FormatError(err)
+		return store.FormatError(err)
 	}
 
 	return nil

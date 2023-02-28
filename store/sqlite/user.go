@@ -1,16 +1,17 @@
-package store
+package sqlite
 
 import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/usememos/memos/store"
 	"strings"
 
 	"github.com/usememos/memos/api"
 	"github.com/usememos/memos/common"
 )
 
-// userRaw is the store model for an User.
+// userRaw is the sqlite model for an User.
 // Fields have exactly the same meanings as User.
 type userRaw struct {
 	ID int
@@ -66,7 +67,7 @@ func (s *Store) ComposeMemoCreator(ctx context.Context, memo *api.Memo) error {
 func (s *Store) CreateUser(ctx context.Context, create *api.UserCreate) (*api.User, error) {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 	defer tx.Rollback()
 
@@ -76,7 +77,7 @@ func (s *Store) CreateUser(ctx context.Context, create *api.UserCreate) (*api.Us
 	}
 
 	if err := tx.Commit(); err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 
 	s.userCache.Store(userRaw.ID, userRaw)
@@ -87,7 +88,7 @@ func (s *Store) CreateUser(ctx context.Context, create *api.UserCreate) (*api.Us
 func (s *Store) PatchUser(ctx context.Context, patch *api.UserPatch) (*api.User, error) {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 	defer tx.Rollback()
 
@@ -97,7 +98,7 @@ func (s *Store) PatchUser(ctx context.Context, patch *api.UserPatch) (*api.User,
 	}
 
 	if err := tx.Commit(); err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 
 	s.userCache.Store(userRaw.ID, userRaw)
@@ -108,7 +109,7 @@ func (s *Store) PatchUser(ctx context.Context, patch *api.UserPatch) (*api.User,
 func (s *Store) FindUserList(ctx context.Context, find *api.UserFind) ([]*api.User, error) {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 	defer tx.Rollback()
 
@@ -134,7 +135,7 @@ func (s *Store) FindUser(ctx context.Context, find *api.UserFind) (*api.User, er
 
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 	defer tx.Rollback()
 
@@ -156,7 +157,7 @@ func (s *Store) FindUser(ctx context.Context, find *api.UserFind) (*api.User, er
 func (s *Store) DeleteUser(ctx context.Context, delete *api.UserDelete) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
-		return FormatError(err)
+		return store.FormatError(err)
 	}
 	defer tx.Rollback()
 
@@ -209,7 +210,7 @@ func createUser(ctx context.Context, tx *sql.Tx, create *api.UserCreate) (*userR
 		&userRaw.UpdatedTs,
 		&userRaw.RowStatus,
 	); err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 
 	return &userRaw, nil
@@ -265,7 +266,7 @@ func patchUser(ctx context.Context, tx *sql.Tx, patch *api.UserPatch) (*userRaw,
 		&userRaw.UpdatedTs,
 		&userRaw.RowStatus,
 	); err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 
 	return &userRaw, nil
@@ -312,7 +313,7 @@ func findUserList(ctx context.Context, tx *sql.Tx, find *api.UserFind) ([]*userR
 	`
 	rows, err := tx.QueryContext(ctx, query, args...)
 	if err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 	defer rows.Close()
 
@@ -332,13 +333,13 @@ func findUserList(ctx context.Context, tx *sql.Tx, find *api.UserFind) ([]*userR
 			&userRaw.UpdatedTs,
 			&userRaw.RowStatus,
 		); err != nil {
-			return nil, FormatError(err)
+			return nil, store.FormatError(err)
 		}
 		userRawList = append(userRawList, &userRaw)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 
 	return userRawList, nil
@@ -349,7 +350,7 @@ func deleteUser(ctx context.Context, tx *sql.Tx, delete *api.UserDelete) error {
 		DELETE FROM user WHERE id = ?
 	`, delete.ID)
 	if err != nil {
-		return FormatError(err)
+		return store.FormatError(err)
 	}
 
 	rows, err := result.RowsAffected()

@@ -111,6 +111,7 @@ func initConfig() {
 
 	println("---")
 	println("Server profile")
+	println("db driver:", profile.DBDriver)
 	println("dsn:", profile.DSN)
 	println("port:", profile.Port)
 	println("mode:", profile.Mode)

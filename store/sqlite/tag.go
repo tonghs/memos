@@ -1,9 +1,10 @@
-package store
+package sqlite
 
 import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/usememos/memos/store"
 	"strings"
 
 	"github.com/usememos/memos/api"
@@ -25,7 +26,7 @@ func (raw *tagRaw) toTag() *api.Tag {
 func (s *Store) UpsertTag(ctx context.Context, upsert *api.TagUpsert) (*api.Tag, error) {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 	defer tx.Rollback()
 
@@ -46,7 +47,7 @@ func (s *Store) UpsertTag(ctx context.Context, upsert *api.TagUpsert) (*api.Tag,
 func (s *Store) FindTagList(ctx context.Context, find *api.TagFind) ([]*api.Tag, error) {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 	defer tx.Rollback()
 
@@ -66,16 +67,16 @@ func (s *Store) FindTagList(ctx context.Context, find *api.TagFind) ([]*api.Tag,
 func (s *Store) DeleteTag(ctx context.Context, delete *api.TagDelete) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
-		return FormatError(err)
+		return store.FormatError(err)
 	}
 	defer tx.Rollback()
 
 	if err := deleteTag(ctx, tx, delete); err != nil {
-		return FormatError(err)
+		return store.FormatError(err)
 	}
 
 	if err := tx.Commit(); err != nil {
-		return FormatError(err)
+		return store.FormatError(err)
 	}
 
 	return nil
@@ -97,7 +98,7 @@ func upsertTag(ctx context.Context, tx *sql.Tx, upsert *api.TagUpsert) (*tagRaw,
 		&tagRaw.Name,
 		&tagRaw.CreatorID,
 	); err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 
 	return &tagRaw, nil
@@ -116,7 +117,7 @@ func findTagList(ctx context.Context, tx *sql.Tx, find *api.TagFind) ([]*tagRaw,
 	`
 	rows, err := tx.QueryContext(ctx, query, args...)
 	if err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 	defer rows.Close()
 
@@ -127,14 +128,14 @@ func findTagList(ctx context.Context, tx *sql.Tx, find *api.TagFind) ([]*tagRaw,
 			&tagRaw.Name,
 			&tagRaw.CreatorID,
 		); err != nil {
-			return nil, FormatError(err)
+			return nil, store.FormatError(err)
 		}
 
 		tagRawList = append(tagRawList, &tagRaw)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 
 	return tagRawList, nil
@@ -146,7 +147,7 @@ func deleteTag(ctx context.Context, tx *sql.Tx, delete *api.TagDelete) error {
 	stmt := `DELETE FROM tag WHERE ` + strings.Join(where, " AND ")
 	result, err := tx.ExecContext(ctx, stmt, args...)
 	if err != nil {
-		return FormatError(err)
+		return store.FormatError(err)
 	}
 
 	rows, _ := result.RowsAffected()
@@ -170,7 +171,7 @@ func vacuumTag(ctx context.Context, tx *sql.Tx) error {
 		)`
 	_, err := tx.ExecContext(ctx, stmt)
 	if err != nil {
-		return FormatError(err)
+		return store.FormatError(err)
 	}
 
 	return nil

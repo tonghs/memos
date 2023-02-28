@@ -18,6 +18,8 @@ type Profile struct {
 	Port int `json:"-"`
 	// Data is the data directory
 	Data string `json:"-"`
+	// DBDriver is the db type sqlite/mysql/postgresql
+	DBDriver string `json:"-"`
 	// DSN points to where Memos stores its own data
 	DSN string `json:"-"`
 	// Version is the current version of server
@@ -67,7 +69,10 @@ func GetProfile() (*Profile, error) {
 	}
 
 	profile.Data = dataDir
-	profile.DSN = fmt.Sprintf("%s/memos_%s.db", dataDir, profile.Mode)
+	//profile.DBDriver = "sqlite"
+	//profile.DSN = fmt.Sprintf("%s/memos_%s.db", dataDir, profile.Mode)
+	profile.DBDriver = "mysql"
+	profile.DSN = fmt.Sprintf("root:tonghs@tcp(127.0.0.1:13306)/memos_%s?charset=utf8mb4&parseTime=True&loc=Local", profile.Mode)
 	profile.Version = version.GetCurrentVersion(profile.Mode)
 
 	return &profile, nil

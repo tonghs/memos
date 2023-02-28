@@ -7,17 +7,15 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/gorilla/sessions"
+	"github.com/labstack/echo-contrib/session"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/pkg/errors"
 	"github.com/usememos/memos/api"
 	metric "github.com/usememos/memos/plugin/metrics"
 	"github.com/usememos/memos/server/profile"
 	"github.com/usememos/memos/store"
-	"github.com/usememos/memos/store/db"
-
-	"github.com/gorilla/sessions"
-	"github.com/labstack/echo-contrib/session"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 )
 
 type Server struct {
@@ -26,7 +24,7 @@ type Server struct {
 
 	ID        string
 	Profile   *profile.Profile
-	Store     *store.Store
+	Store     store.Store
 	Collector *MetricCollector
 }
 
@@ -36,17 +34,17 @@ func NewServer(ctx context.Context, profile *profile.Profile) (*Server, error) {
 	e.HideBanner = true
 	e.HidePort = true
 
-	db := db.NewDB(profile)
+	db := newDB(profile)
 	if err := db.Open(ctx); err != nil {
 		return nil, errors.Wrap(err, "cannot open db")
 	}
 
 	s := &Server{
 		e:       e,
-		db:      db.DBInstance,
+		db:      db.Instance(),
 		Profile: profile,
 	}
-	storeInstance := store.New(db.DBInstance, profile)
+	storeInstance := newStore(db.Instance(), profile)
 	s.Store = storeInstance
 
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{

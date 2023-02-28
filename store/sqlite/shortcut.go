@@ -1,16 +1,17 @@
-package store
+package sqlite
 
 import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/usememos/memos/store"
 	"strings"
 
 	"github.com/usememos/memos/api"
 	"github.com/usememos/memos/common"
 )
 
-// shortcutRaw is the store model for an Shortcut.
+// shortcutRaw is the sqlite model for an Shortcut.
 // Fields have exactly the same meanings as Shortcut.
 type shortcutRaw struct {
 	ID int
@@ -43,7 +44,7 @@ func (raw *shortcutRaw) toShortcut() *api.Shortcut {
 func (s *Store) CreateShortcut(ctx context.Context, create *api.ShortcutCreate) (*api.Shortcut, error) {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 	defer tx.Rollback()
 
@@ -53,7 +54,7 @@ func (s *Store) CreateShortcut(ctx context.Context, create *api.ShortcutCreate) 
 	}
 
 	if err := tx.Commit(); err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 
 	s.shortcutCache.Store(shortcutRaw.ID, shortcutRaw)
@@ -65,7 +66,7 @@ func (s *Store) CreateShortcut(ctx context.Context, create *api.ShortcutCreate) 
 func (s *Store) PatchShortcut(ctx context.Context, patch *api.ShortcutPatch) (*api.Shortcut, error) {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 	defer tx.Rollback()
 
@@ -75,7 +76,7 @@ func (s *Store) PatchShortcut(ctx context.Context, patch *api.ShortcutPatch) (*a
 	}
 
 	if err := tx.Commit(); err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 
 	s.shortcutCache.Store(shortcutRaw.ID, shortcutRaw)
@@ -87,7 +88,7 @@ func (s *Store) PatchShortcut(ctx context.Context, patch *api.ShortcutPatch) (*a
 func (s *Store) FindShortcutList(ctx context.Context, find *api.ShortcutFind) ([]*api.Shortcut, error) {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 	defer tx.Rollback()
 
@@ -113,7 +114,7 @@ func (s *Store) FindShortcut(ctx context.Context, find *api.ShortcutFind) (*api.
 
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 	defer tx.Rollback()
 
@@ -136,17 +137,17 @@ func (s *Store) FindShortcut(ctx context.Context, find *api.ShortcutFind) (*api.
 func (s *Store) DeleteShortcut(ctx context.Context, delete *api.ShortcutDelete) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
-		return FormatError(err)
+		return store.FormatError(err)
 	}
 	defer tx.Rollback()
 
 	err = deleteShortcut(ctx, tx, delete)
 	if err != nil {
-		return FormatError(err)
+		return store.FormatError(err)
 	}
 
 	if err := tx.Commit(); err != nil {
-		return FormatError(err)
+		return store.FormatError(err)
 	}
 
 	s.shortcutCache.Delete(*delete.ID)
@@ -173,7 +174,7 @@ func createShortcut(ctx context.Context, tx *sql.Tx, create *api.ShortcutCreate)
 		&shortcutRaw.UpdatedTs,
 		&shortcutRaw.RowStatus,
 	); err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 
 	return &shortcutRaw, nil
@@ -213,7 +214,7 @@ func patchShortcut(ctx context.Context, tx *sql.Tx, patch *api.ShortcutPatch) (*
 		&shortcutRaw.UpdatedTs,
 		&shortcutRaw.RowStatus,
 	); err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 
 	return &shortcutRaw, nil
@@ -247,7 +248,7 @@ func findShortcutList(ctx context.Context, tx *sql.Tx, find *api.ShortcutFind) (
 		args...,
 	)
 	if err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 	defer rows.Close()
 
@@ -263,14 +264,14 @@ func findShortcutList(ctx context.Context, tx *sql.Tx, find *api.ShortcutFind) (
 			&shortcutRaw.UpdatedTs,
 			&shortcutRaw.RowStatus,
 		); err != nil {
-			return nil, FormatError(err)
+			return nil, store.FormatError(err)
 		}
 
 		shortcutRawList = append(shortcutRawList, &shortcutRaw)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 
 	return shortcutRawList, nil
@@ -289,7 +290,7 @@ func deleteShortcut(ctx context.Context, tx *sql.Tx, delete *api.ShortcutDelete)
 	stmt := `DELETE FROM shortcut WHERE ` + strings.Join(where, " AND ")
 	result, err := tx.ExecContext(ctx, stmt, args...)
 	if err != nil {
-		return FormatError(err)
+		return store.FormatError(err)
 	}
 
 	rows, _ := result.RowsAffected()
@@ -313,7 +314,7 @@ func vacuumShortcut(ctx context.Context, tx *sql.Tx) error {
 		)`
 	_, err := tx.ExecContext(ctx, stmt)
 	if err != nil {
-		return FormatError(err)
+		return store.FormatError(err)
 	}
 
 	return nil

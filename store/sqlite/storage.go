@@ -1,10 +1,11 @@
-package store
+package sqlite
 
 import (
 	"context"
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"github.com/usememos/memos/store"
 	"strings"
 
 	"github.com/usememos/memos/api"
@@ -30,7 +31,7 @@ func (raw *storageRaw) toStorage() *api.Storage {
 func (s *Store) CreateStorage(ctx context.Context, create *api.StorageCreate) (*api.Storage, error) {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 	defer tx.Rollback()
 
@@ -40,7 +41,7 @@ func (s *Store) CreateStorage(ctx context.Context, create *api.StorageCreate) (*
 	}
 
 	if err := tx.Commit(); err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 
 	return storageRaw.toStorage(), nil
@@ -49,7 +50,7 @@ func (s *Store) CreateStorage(ctx context.Context, create *api.StorageCreate) (*
 func (s *Store) PatchStorage(ctx context.Context, patch *api.StoragePatch) (*api.Storage, error) {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 	defer tx.Rollback()
 
@@ -59,7 +60,7 @@ func (s *Store) PatchStorage(ctx context.Context, patch *api.StoragePatch) (*api
 	}
 
 	if err := tx.Commit(); err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 
 	return storageRaw.toStorage(), nil
@@ -68,7 +69,7 @@ func (s *Store) PatchStorage(ctx context.Context, patch *api.StoragePatch) (*api
 func (s *Store) FindStorageList(ctx context.Context, find *api.StorageFind) ([]*api.Storage, error) {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 	defer tx.Rollback()
 
@@ -88,7 +89,7 @@ func (s *Store) FindStorageList(ctx context.Context, find *api.StorageFind) ([]*
 func (s *Store) FindStorage(ctx context.Context, find *api.StorageFind) (*api.Storage, error) {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 	defer tx.Rollback()
 
@@ -108,16 +109,16 @@ func (s *Store) FindStorage(ctx context.Context, find *api.StorageFind) (*api.St
 func (s *Store) DeleteStorage(ctx context.Context, delete *api.StorageDelete) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
-		return FormatError(err)
+		return store.FormatError(err)
 	}
 	defer tx.Rollback()
 
 	if err := deleteStorage(ctx, tx, delete); err != nil {
-		return FormatError(err)
+		return store.FormatError(err)
 	}
 
 	if err := tx.Commit(); err != nil {
-		return FormatError(err)
+		return store.FormatError(err)
 	}
 
 	return nil
@@ -155,7 +156,7 @@ func createStorageRaw(ctx context.Context, tx *sql.Tx, create *api.StorageCreate
 	if err := tx.QueryRowContext(ctx, query, args...).Scan(
 		&storageRaw.ID,
 	); err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 
 	return &storageRaw, nil
@@ -195,7 +196,7 @@ func patchStorageRaw(ctx context.Context, tx *sql.Tx, patch *api.StoragePatch) (
 		&storageRaw.Type,
 		&storageConfig,
 	); err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 	if storageRaw.Type == api.StorageS3 {
 		s3Config := &api.StorageS3Config{}
@@ -231,7 +232,7 @@ func findStorageRawList(ctx context.Context, tx *sql.Tx, find *api.StorageFind) 
 	`
 	rows, err := tx.QueryContext(ctx, query, args...)
 	if err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 	defer rows.Close()
 
@@ -245,7 +246,7 @@ func findStorageRawList(ctx context.Context, tx *sql.Tx, find *api.StorageFind) 
 			&storageRaw.Type,
 			&storageConfig,
 		); err != nil {
-			return nil, FormatError(err)
+			return nil, store.FormatError(err)
 		}
 		if storageRaw.Type == api.StorageS3 {
 			s3Config := &api.StorageS3Config{}
@@ -262,7 +263,7 @@ func findStorageRawList(ctx context.Context, tx *sql.Tx, find *api.StorageFind) 
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 
 	return storageRawList, nil
@@ -274,7 +275,7 @@ func deleteStorage(ctx context.Context, tx *sql.Tx, delete *api.StorageDelete) e
 	stmt := `DELETE FROM storage WHERE ` + strings.Join(where, " AND ")
 	result, err := tx.ExecContext(ctx, stmt, args...)
 	if err != nil {
-		return FormatError(err)
+		return store.FormatError(err)
 	}
 
 	rows, _ := result.RowsAffected()
