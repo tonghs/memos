@@ -1,4 +1,4 @@
-package rds
+package mysql
 
 import (
 	"context"
@@ -140,21 +140,6 @@ func (s *Store) DeleteMemoResource(ctx context.Context, delete *api.MemoResource
 	panic("implement me")
 }
 
-func (s *Store) UpsertSystemSetting(ctx context.Context, upsert *api.SystemSettingUpsert) (*api.SystemSetting, error) {
-	// TODO implement me
-	panic("implement me")
-}
-
-func (s *Store) FindSystemSettingList(ctx context.Context, find *api.SystemSettingFind) ([]*api.SystemSetting, error) {
-	// TODO implement me
-	panic("implement me")
-}
-
-func (s *Store) FindSystemSetting(ctx context.Context, find *api.SystemSettingFind) (*api.SystemSetting, error) {
-	// TODO implement me
-	panic("implement me")
-}
-
 func (s *Store) ComposeMemoCreator(ctx context.Context, memo *api.Memo) error {
 	// TODO implement me
 	panic("implement me")
@@ -206,11 +191,6 @@ func (s *Store) FindStorage(ctx context.Context, find *api.StorageFind) (*api.St
 }
 
 func (s *Store) DeleteStorage(ctx context.Context, delete *api.StorageDelete) error {
-	// TODO implement me
-	panic("implement me")
-}
-
-func (s *Store) CreateActivity(ctx context.Context, create *api.ActivityCreate) (*api.Activity, error) {
 	// TODO implement me
 	panic("implement me")
 }

@@ -5,7 +5,7 @@ import (
 
 	"github.com/usememos/memos/server/profile"
 	"github.com/usememos/memos/store"
-	rdsDB "github.com/usememos/memos/store/rds/db"
+	rdsDB "github.com/usememos/memos/store/mysql/db"
 	sqliteDB "github.com/usememos/memos/store/sqlite/db"
 )
 

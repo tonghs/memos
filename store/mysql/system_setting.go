@@ -1,4 +1,4 @@
-package sqlite
+package mysql
 
 import (
 	"context"
@@ -81,14 +81,22 @@ func upsertSystemSetting(ctx context.Context, tx *sql.Tx, upsert *api.SystemSett
 			name, value, description
 		)
 		VALUES (?, ?, ?)
-		ON CONFLICT(name) DO UPDATE 
-		SET
-			value = EXCLUDED.value,
-			description = EXCLUDED.description
-		RETURNING name, value, description
+		ON DUPLICATE KEY UPDATE
+			value = value,
+			description = description
+	`
+	if _, err := tx.ExecContext(ctx, query, upsert.Name, upsert.Value, upsert.Description); err != nil {
+		return nil, store.FormatError(err)
+	}
+
+	query = `
+		select
+		    name, value, description
+		from system_setting
+		where name = ?
 	`
 	var systemSettingRaw store.SystemSettingRaw
-	if err := tx.QueryRowContext(ctx, query, upsert.Name, upsert.Value, upsert.Description).Scan(
+	if err := tx.QueryRowContext(ctx, query, upsert.Name).Scan(
 		&systemSettingRaw.Name,
 		&systemSettingRaw.Value,
 		&systemSettingRaw.Description,
@@ -108,7 +116,7 @@ func findSystemSettingList(ctx context.Context, tx *sql.Tx, find *api.SystemSett
 	query := `
 		SELECT
 			name,
-		  value,
+		    value,
 			description
 		FROM system_setting
 		WHERE ` + strings.Join(where, " AND ")

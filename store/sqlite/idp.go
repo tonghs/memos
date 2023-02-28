@@ -14,7 +14,7 @@ import (
 func (s *Store) CreateIdentityProvider(ctx context.Context, create *store.IdentityProviderMessage) (*store.IdentityProviderMessage, error) {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 	defer tx.Rollback()
 
@@ -47,10 +47,10 @@ func (s *Store) CreateIdentityProvider(ctx context.Context, create *store.Identi
 	).Scan(
 		&create.ID,
 	); err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 	if err := tx.Commit(); err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 	identityProviderMessage := create
 	s.idpCache.Store(identityProviderMessage.ID, identityProviderMessage)
@@ -60,7 +60,7 @@ func (s *Store) CreateIdentityProvider(ctx context.Context, create *store.Identi
 func (s *Store) ListIdentityProviders(ctx context.Context, find *store.FindIdentityProviderMessage) ([]*store.IdentityProviderMessage, error) {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 	defer tx.Rollback()
 
@@ -84,7 +84,7 @@ func (s *Store) GetIdentityProvider(ctx context.Context, find *store.FindIdentit
 
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 	defer tx.Rollback()
 
@@ -104,7 +104,7 @@ func (s *Store) GetIdentityProvider(ctx context.Context, find *store.FindIdentit
 func (s *Store) UpdateIdentityProvider(ctx context.Context, update *store.UpdateIdentityProviderMessage) (*store.IdentityProviderMessage, error) {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 	defer tx.Rollback()
 
@@ -144,7 +144,7 @@ func (s *Store) UpdateIdentityProvider(ctx context.Context, update *store.Update
 		&identityProviderMessage.IdentifierFilter,
 		&identityProviderConfig,
 	); err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 	if identityProviderMessage.Type == store.IdentityProviderOAuth2 {
 		oauth2Config := &store.IdentityProviderOAuth2Config{}
@@ -158,7 +158,7 @@ func (s *Store) UpdateIdentityProvider(ctx context.Context, update *store.Update
 		return nil, fmt.Errorf("unsupported idp type %s", string(identityProviderMessage.Type))
 	}
 	if err := tx.Commit(); err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 	s.idpCache.Store(identityProviderMessage.ID, identityProviderMessage)
 	return &identityProviderMessage, nil
@@ -167,7 +167,7 @@ func (s *Store) UpdateIdentityProvider(ctx context.Context, update *store.Update
 func (s *Store) DeleteIdentityProvider(ctx context.Context, delete *store.DeleteIdentityProviderMessage) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
-		return FormatError(err)
+		return store.FormatError(err)
 	}
 	defer tx.Rollback()
 
@@ -175,7 +175,7 @@ func (s *Store) DeleteIdentityProvider(ctx context.Context, delete *store.Delete
 	stmt := `DELETE FROM idp WHERE ` + strings.Join(where, " AND ")
 	result, err := tx.ExecContext(ctx, stmt, args...)
 	if err != nil {
-		return FormatError(err)
+		return store.FormatError(err)
 	}
 
 	rows, err := result.RowsAffected()
@@ -210,7 +210,7 @@ func listIdentityProviders(ctx context.Context, tx *sql.Tx, find *store.FindIden
 		args...,
 	)
 	if err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 	defer rows.Close()
 
@@ -225,7 +225,7 @@ func listIdentityProviders(ctx context.Context, tx *sql.Tx, find *store.FindIden
 			&identityProviderMessage.IdentifierFilter,
 			&identityProviderConfig,
 		); err != nil {
-			return nil, FormatError(err)
+			return nil, store.FormatError(err)
 		}
 		if identityProviderMessage.Type == store.IdentityProviderOAuth2 {
 			oauth2Config := &store.IdentityProviderOAuth2Config{}

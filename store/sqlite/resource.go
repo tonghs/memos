@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/usememos/memos/store"
 	"sort"
 	"strings"
 
@@ -84,7 +85,7 @@ func (s *Store) ComposeMemoResourceList(ctx context.Context, memo *api.Memo) err
 func (s *Store) CreateResource(ctx context.Context, create *api.ResourceCreate) (*api.Resource, error) {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 	defer tx.Rollback()
 
@@ -94,7 +95,7 @@ func (s *Store) CreateResource(ctx context.Context, create *api.ResourceCreate) 
 	}
 
 	if err := tx.Commit(); err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 
 	resource := resourceRaw.toResource()
@@ -105,7 +106,7 @@ func (s *Store) CreateResource(ctx context.Context, create *api.ResourceCreate) 
 func (s *Store) FindResourceList(ctx context.Context, find *api.ResourceFind) ([]*api.Resource, error) {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 	defer tx.Rollback()
 
@@ -125,7 +126,7 @@ func (s *Store) FindResourceList(ctx context.Context, find *api.ResourceFind) ([
 func (s *Store) FindResource(ctx context.Context, find *api.ResourceFind) (*api.Resource, error) {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 	defer tx.Rollback()
 
@@ -147,7 +148,7 @@ func (s *Store) FindResource(ctx context.Context, find *api.ResourceFind) (*api.
 func (s *Store) DeleteResource(ctx context.Context, delete *api.ResourceDelete) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
-		return FormatError(err)
+		return store.FormatError(err)
 	}
 	defer tx.Rollback()
 
@@ -159,7 +160,7 @@ func (s *Store) DeleteResource(ctx context.Context, delete *api.ResourceDelete) 
 	}
 
 	if err := tx.Commit(); err != nil {
-		return FormatError(err)
+		return store.FormatError(err)
 	}
 
 	return nil
@@ -168,7 +169,7 @@ func (s *Store) DeleteResource(ctx context.Context, delete *api.ResourceDelete) 
 func (s *Store) PatchResource(ctx context.Context, patch *api.ResourcePatch) (*api.Resource, error) {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 	defer tx.Rollback()
 
@@ -178,7 +179,7 @@ func (s *Store) PatchResource(ctx context.Context, patch *api.ResourcePatch) (*a
 	}
 
 	if err := tx.Commit(); err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 
 	resource := resourceRaw.toResource()
@@ -211,7 +212,7 @@ func createResource(ctx context.Context, tx *sql.Tx, create *api.ResourceCreate)
 		&resourceRaw.CreatedTs,
 		&resourceRaw.UpdatedTs,
 	); err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 
 	return &resourceRaw, nil
@@ -247,7 +248,7 @@ func patchResource(ctx context.Context, tx *sql.Tx, patch *api.ResourcePatch) (*
 		&resourceRaw.CreatedTs,
 		&resourceRaw.UpdatedTs,
 	); err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 
 	return &resourceRaw, nil
@@ -283,7 +284,7 @@ func findResourceList(ctx context.Context, tx *sql.Tx, find *api.ResourceFind) (
 	`, strings.Join(fields, ", "), strings.Join(where, " AND "))
 	rows, err := tx.QueryContext(ctx, query, args...)
 	if err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 	defer rows.Close()
 
@@ -306,14 +307,14 @@ func findResourceList(ctx context.Context, tx *sql.Tx, find *api.ResourceFind) (
 		if err := rows.Scan(
 			dest...,
 		); err != nil {
-			return nil, FormatError(err)
+			return nil, store.FormatError(err)
 		}
 
 		resourceRawList = append(resourceRawList, &resourceRaw)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 
 	return resourceRawList, nil
@@ -325,7 +326,7 @@ func deleteResource(ctx context.Context, tx *sql.Tx, delete *api.ResourceDelete)
 	stmt := `DELETE FROM resource WHERE ` + strings.Join(where, " AND ")
 	result, err := tx.ExecContext(ctx, stmt, args...)
 	if err != nil {
-		return FormatError(err)
+		return store.FormatError(err)
 	}
 
 	rows, _ := result.RowsAffected()
@@ -349,7 +350,7 @@ func vacuumResource(ctx context.Context, tx *sql.Tx) error {
 		)`
 	_, err := tx.ExecContext(ctx, stmt)
 	if err != nil {
-		return FormatError(err)
+		return store.FormatError(err)
 	}
 
 	return nil

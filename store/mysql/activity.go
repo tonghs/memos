@@ -1,4 +1,4 @@
-package sqlite
+package mysql
 
 import (
 	"context"
@@ -42,10 +42,28 @@ func createActivity(ctx context.Context, tx *sql.Tx, create *api.ActivityCreate)
 			payload
 		)
 		VALUES (?, ?, ?, ?)
-		RETURNING id, type, level, payload, creator_id, created_ts
+	`
+	r, err := tx.ExecContext(ctx, query, create.CreatorID, create.Type, create.Level, create.Payload)
+	if err != nil {
+		return nil, store.FormatError(err)
+	}
+	lastInsertId, err := r.LastInsertId()
+	if err != nil {
+		return nil, store.FormatError(err)
+	}
+	query = `
+		select
+		    id,
+			type, 
+			level, 
+			payload,
+			creator_id,
+			UNIX_TIMESTAMP(created_ts)
+		from activity 
+		where id = ?
 	`
 	var activityRaw store.ActivityRaw
-	if err := tx.QueryRowContext(ctx, query, create.CreatorID, create.Type, create.Level, create.Payload).Scan(
+	if err := tx.QueryRowContext(ctx, query, lastInsertId).Scan(
 		&activityRaw.ID,
 		&activityRaw.Type,
 		&activityRaw.Level,

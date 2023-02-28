@@ -5,12 +5,9 @@ import (
 	"database/sql"
 	"embed"
 	"fmt"
-	mysql2 "github.com/go-sql-driver/mysql"
+	"github.com/go-sql-driver/mysql"
 	"github.com/usememos/memos/server/profile"
 	"github.com/usememos/memos/store"
-	"gorm.io/driver/mysql"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 	"strings"
 )
 
@@ -41,12 +38,9 @@ func (db *DB) Open(ctx context.Context) (err error) {
 		return fmt.Errorf("dsn required")
 	}
 
-	var _db *gorm.DB
 	switch db.profile.DBDriver {
-	case store.MySQLDriver:
-		_db, err = gorm.Open(mysql.Open(db.profile.DSN), &gorm.Config{})
-	case store.PostgresDriver:
-		_db, err = gorm.Open(postgres.Open(db.profile.DSN), &gorm.Config{})
+	case store.MySQLDriver, store.PostgresDriver:
+		db.DBInstance, err = sql.Open(store.MySQLDriver, db.profile.DSN)
 	default:
 		return fmt.Errorf("failed to open db, err: unknown db driver: %s", db.profile.DBDriver)
 	}
@@ -55,18 +49,13 @@ func (db *DB) Open(ctx context.Context) (err error) {
 		return fmt.Errorf("failed to open db with dsn: %s, err: %w", db.profile.DSN, err)
 	}
 
-	db.DBInstance, err = _db.DB()
-	if err != nil {
-		return fmt.Errorf("failed to get db instance with dsn: %s, err: %w", db.profile.DSN, err)
-	}
-
 	if err = db.DBInstance.PingContext(ctx); err != nil {
 		return fmt.Errorf("failed to connect to db instance with dsn: %s, err: %w", db.profile.DSN, err)
 	}
 
 	// if database table not exists, we should migrate the database.
 	if _, err := db.DBInstance.ExecContext(ctx, "desc table user"); err != nil {
-		if err, ok := err.(*mysql2.MySQLError); ok {
+		if err, ok := err.(*mysql.MySQLError); ok {
 			if int(err.Number) == 1146 {
 				if err := db.applyLatestSchema(ctx); err != nil {
 					return fmt.Errorf("failed to apply latest schema: %w", err)

@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/usememos/memos/store"
 	"strings"
 
 	"github.com/usememos/memos/api"
@@ -31,7 +32,7 @@ func (raw *memoResourceRaw) toMemoResource() *api.MemoResource {
 func (s *Store) FindMemoResourceList(ctx context.Context, find *api.MemoResourceFind) ([]*api.MemoResource, error) {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 	defer tx.Rollback()
 
@@ -52,7 +53,7 @@ func (s *Store) FindMemoResourceList(ctx context.Context, find *api.MemoResource
 func (s *Store) FindMemoResource(ctx context.Context, find *api.MemoResourceFind) (*api.MemoResource, error) {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 	defer tx.Rollback()
 
@@ -73,7 +74,7 @@ func (s *Store) FindMemoResource(ctx context.Context, find *api.MemoResourceFind
 func (s *Store) UpsertMemoResource(ctx context.Context, upsert *api.MemoResourceUpsert) (*api.MemoResource, error) {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 	defer tx.Rollback()
 
@@ -83,7 +84,7 @@ func (s *Store) UpsertMemoResource(ctx context.Context, upsert *api.MemoResource
 	}
 
 	if err := tx.Commit(); err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 
 	return memoResourceRaw.toMemoResource(), nil
@@ -92,16 +93,16 @@ func (s *Store) UpsertMemoResource(ctx context.Context, upsert *api.MemoResource
 func (s *Store) DeleteMemoResource(ctx context.Context, delete *api.MemoResourceDelete) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
-		return FormatError(err)
+		return store.FormatError(err)
 	}
 	defer tx.Rollback()
 
 	if err := deleteMemoResource(ctx, tx, delete); err != nil {
-		return FormatError(err)
+		return store.FormatError(err)
 	}
 
 	if err := tx.Commit(); err != nil {
-		return FormatError(err)
+		return store.FormatError(err)
 	}
 
 	return nil
@@ -129,7 +130,7 @@ func findMemoResourceList(ctx context.Context, tx *sql.Tx, find *api.MemoResourc
 	`
 	rows, err := tx.QueryContext(ctx, query, args...)
 	if err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 	defer rows.Close()
 
@@ -142,7 +143,7 @@ func findMemoResourceList(ctx context.Context, tx *sql.Tx, find *api.MemoResourc
 			&memoResourceRaw.CreatedTs,
 			&memoResourceRaw.UpdatedTs,
 		); err != nil {
-			return nil, FormatError(err)
+			return nil, store.FormatError(err)
 		}
 
 		memoResourceRawList = append(memoResourceRawList, &memoResourceRaw)
@@ -181,7 +182,7 @@ func upsertMemoResource(ctx context.Context, tx *sql.Tx, upsert *api.MemoResourc
 		&memoResourceRaw.CreatedTs,
 		&memoResourceRaw.UpdatedTs,
 	); err != nil {
-		return nil, FormatError(err)
+		return nil, store.FormatError(err)
 	}
 
 	return &memoResourceRaw, nil
@@ -200,7 +201,7 @@ func deleteMemoResource(ctx context.Context, tx *sql.Tx, delete *api.MemoResourc
 	stmt := `DELETE FROM memo_resource WHERE ` + strings.Join(where, " AND ")
 	result, err := tx.ExecContext(ctx, stmt, args...)
 	if err != nil {
-		return FormatError(err)
+		return store.FormatError(err)
 	}
 
 	rows, _ := result.RowsAffected()
@@ -230,7 +231,7 @@ func vacuumMemoResource(ctx context.Context, tx *sql.Tx) error {
 		)`
 	_, err := tx.ExecContext(ctx, stmt)
 	if err != nil {
-		return FormatError(err)
+		return store.FormatError(err)
 	}
 
 	return nil

@@ -3,7 +3,7 @@ package server
 import (
 	"database/sql"
 	"fmt"
-	"github.com/usememos/memos/store/rds"
+	"github.com/usememos/memos/store/mysql"
 
 	"github.com/usememos/memos/server/profile"
 	"github.com/usememos/memos/store"
@@ -16,7 +16,7 @@ func newStore(db *sql.DB, profile *profile.Profile) store.Store {
 	case store.SQLiteDriver:
 		return sqlite.New(db, profile)
 	case store.MySQLDriver, store.PostgresDriver:
-		return rds.New(db, profile)
+		return mysql.New(db, profile)
 	default:
 		panic(fmt.Sprintf("unknown db driver: %s", profile.DBDriver))
 	}
